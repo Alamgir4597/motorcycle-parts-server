@@ -16,6 +16,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 function verifJWT(req,res,next) {
     const authHeader=req.headers.authorization;
+    
     if(!authHeader){
         return res.status(401).send({message: 'UnAuthorized Access'})
     }
@@ -42,13 +43,33 @@ async function run() {
             const email=req.params.email;
             const user=req.body;
             const filter={email:email};
-            const options={upsert:true};
+            const options={ upsert: true };
             const updateDoc={
-                $set:user
+                $set: user,
             };
             const result=await userCollectoin.updateOne(filter,updateDoc,options);
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN ,{expiresIn:'1h'} );
             res.send({result,token})
+        });
+        app.put('/user/admin/:email',verifJWT, async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const requester=req.decoded.email;
+            const requesterAccount=await userCollectoin.findOne({email:requester})
+            if(requesterAccount.role==='admin'){
+                const filter={email:email};
+                const updateDoc={
+                    $set:{role: 'admin'},
+                };
+                const result = await userCollectoin.updateOne(filter, updateDoc, options);
+
+                res.send(result)
+            }else{
+res.status(403).send({message:'forbidden'})
+            }
+           
+            
+            
         });
 
         app.get('/user', async (req,res)=>{
@@ -63,16 +84,31 @@ async function run() {
 
 
         app.post('/addpart', async (req, res) => {
-            newParts = req.body;
+          const  newParts = req.body;
             console.log('add new product', newParts);
             const result = await partsCollectoin.insertOne(newParts);
             res.send(result);
         });
          app.post('/order', async (req, res) => {
-            newOrder = req.body;
-             console.log('add new product', newOrder);
+          const  newOrder = req.body;
+             const query = { custName: newOrder.custName, totalPrice
+                 : newOrder.totalPrice, email
+                     : newOrder.email, phone: newOrder.phone, orderData: newOrder.orderData } ;
+                    //  const exists= await orderCollectoin.findOne(query);
+                    //  if(exists){
+                    //      return res.send({success:false,newOrder:exists})
+                    //  }
             const result = await orderCollectoin.insertOne(newOrder);
-            res.send(result);
+            res.send( {success: true ,result});
+        });
+
+        app.get('/order',  async (req, res) => {
+            const custName =req.query.email;
+            
+            const query = { custName: custName
+};
+            const order = await orderCollectoin.find(query).toArray();
+            res.send(order)
         });
 
         
