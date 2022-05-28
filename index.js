@@ -4,7 +4,7 @@ const app= express();
 const port=process.env.PORT  || 5000;
 require('dotenv').config()
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId} = require('mongodb');
 const res = require('express/lib/response');
 
 app.use(cors())
@@ -51,7 +51,7 @@ async function run() {
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN ,{expiresIn:'1h'} );
             res.send({result,token})
         });
-        app.put('/user/admin/:email',verifJWT, async (req, res) => {
+        app.put('/user/admin/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const requester=req.decoded.email;
@@ -65,12 +65,21 @@ async function run() {
 
                 res.send(result)
             }else{
-res.status(403).send({message:'forbidden'})
+            res.status(403).send({message:'forbidden'})
             }
-           
-            
-            
         });
+
+
+       
+
+  
+        app.get('/admin/:email', async (req, res)=>{
+            const email = req.params.email;
+            const user = await userCollectoin.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin })
+        });
+    
 
         app.get('/user', async (req,res)=>{
             const users= await userCollectoin.find().toArray();
@@ -110,6 +119,13 @@ res.status(403).send({message:'forbidden'})
             const order = await orderCollectoin.find(query).toArray();
             res.send(order)
         });
+
+      app.get('/order/:id', async (req,res)=>{
+          const id=req.path.id;
+          const query={_id:ObjectId(id)};
+          const booking=await orderCollectoin.findOne(query);
+          res.send(booking);
+      });  
 
         
     } finally {
