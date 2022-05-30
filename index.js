@@ -129,6 +129,12 @@ const verifyAdmin= async(req,res,next)=>{
             const users= await userCollectoin.find().toArray();
             res.send(users)
         });
+        app.get('/user/:id', async (req, res) => {
+           const id=req.body.id;
+           const query={ _id: ObjectId(id)} ;
+            const user = await userCollectoin.findOne(query);
+            res.send(user)
+        });
        
         // app.get('/user/:id', async (req, res) => {
         //     const id = req.params.id;
@@ -136,7 +142,7 @@ const verifyAdmin= async(req,res,next)=>{
         //     const result = await userCollectoin.findOne(query);
         //     res.send(result);
         // }) 
-        app.get('/patrs', async (req,res)=>{
+        app.get('/parts', async (req,res)=>{
             const parts = await partsCollectoin.find().toArray();
             res.send(parts)
         });
@@ -150,22 +156,13 @@ const verifyAdmin= async(req,res,next)=>{
         });
          app.post('/order', async (req, res) => {
           const  newOrder = req.body;
-             const query = { custName: newOrder.custName, totalPrice
-                 : newOrder.totalPrice, email
-                     : newOrder.email, phone: newOrder.phone, orderData: newOrder.orderData } ;
-                     const exists= await orderCollectoin.findOne(query);
-                     if(exists){
-                         return res.send({success:false,newOrder:exists})
-                     }
+             
             const result = await orderCollectoin.insertOne(newOrder);
             res.send( result);
         });
 
         app.get('/order',  async (req, res) => {
-            const email =req.query.email;
-            
-            const query = { email: email};
-            const order = await orderCollectoin.find(query).toArray();
+            const order = await orderCollectoin.find().toArray();
             res.send(order)
         });
 
@@ -176,10 +173,16 @@ const verifyAdmin= async(req,res,next)=>{
           res.send(booking);
           console.log(booking)
       });
-      app.delete('/order/:id', async(req,res)=>{
+       app.delete('/order/:id', async(req,res)=>{
           const id=req.params.id ;
          const query={_id:ObjectId(id)};
          const result=await orderCollectoin.deleteOne(query);
+         res.send(result)
+      });
+      app.delete('/parts/:id', async(req,res)=>{
+          const id=req.params.id ;
+         const query={_id:ObjectId(id)};
+         const result=await partsCollectoin.deleteOne(query);
          res.send(result)
       });
 
