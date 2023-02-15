@@ -144,7 +144,7 @@ const verifyAdmin= async(req,res,next)=>{
         // }) 
         app.get('/parts', async (req,res)=>{
             const parts = await partsCollectoin.find().toArray();
-            res.send(parts)
+            res.send(parts);
         });
 
 
