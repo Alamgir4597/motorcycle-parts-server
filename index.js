@@ -166,9 +166,9 @@ const verifyAdmin= async(req,res,next)=>{
             res.send(order)
         });
 
-      app.get('/order/:id', verifJWT, async (req,res)=>{
-          const id=req.params.id;
-          const query={_id:ObjectId(id)};
+      app.get('/order/:email', verifJWT, async (req,res)=>{
+          const email=req.params.email;
+          const query={email:email};
           const booking=await orderCollectoin.findOne(query);
           res.send(booking);
           console.log(booking)
@@ -203,7 +203,7 @@ const verifyAdmin= async(req,res,next)=>{
             const reviews = await reviewsCollectoin.find().toArray();
             res.send(reviews)
         });
-        app.put('/myprofile', async(req,res)=>{
+        app.put('/user', async(req,res)=>{
             const email = req.params.email;
             const user = req.body;
             const filter = { email: email };
